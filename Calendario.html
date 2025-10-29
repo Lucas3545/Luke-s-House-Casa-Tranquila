@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Calendario de Reservas</title>
+    <link rel="stylesheet" href="../css/estilos_calen.css">
+    <link rel="icon" href="../img/logo de luke's huse casa tranquila.webp">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+<header>
+    <h1 class="calendar-title">Calendario de Reservas</h1>
+</header>
+<main>
+<details>
+    <summary>&#9776;</summary>
+       <li><a href="../index.html" class="nav-item" title="Inicio">⏪Inicio</a></li>
+        <li><a href="../panel de acceso.html" class="nav-item" title="Panel de Control">🟩Panel de Acceso</a></li>
+        <li><a href="../informacion.html" class="nav-item" title="Información">🗄️Información</a></li>
+    <li><a href="../Galeria.html" class="nav-item" title="Galeria">🖼️Galeria</a></li>
+    <li><a href="mailto:lucaszv2006@gmail.com" class="nav-item">📧gmail</a></li>
+        <li><a href="tel:+50683256836" class="nav-item" title="Contacto">📞Contacto</a></li>
+        <li><a href="../Terminos_y_condiciones.html" class="nav-item" title="Terminos y Condiciones">📝Terminos y condiciones</a></li>
+
+</details>
+    <div class="calendar-container">
+        <div class="calendar-header">
+            <button id="prevMonth">&lt;</button>
+            <span id="monthYear"></span>
+            <button id="nextMonth">&gt;</button>
+        </div>
+        <div class="calendar-grid" id="calendarDays"></div>
+        <div class="calendar-grid" id="calendar"></div>
+    </div>
+    <div class="reservation-form" id="reservationForm" style="display:none;">
+        <h3>Reservar noche</h3>
+        <p id="selectedDate"></p>
+        <input type="text" id="nombre" placeholder="Tu nombre" required>
+        <input type="email" id="email" placeholder="Tu correo" required>
+        <button id="confirmReservation">Confirmar Reserva</button>
+        <div class="success-message" id="successMsg" style="display:none;">¡Reserva realizada con éxito!</div>
+    </div>
+</main>
+<footer>
+    <p class="footer-text">&copy; Derechos de autor reservados a lucaszv2006</p>
+    <p class="footer-text"><a href="politica_de_privacidad.html">Política de Privacidad</a></p>
+    <p class="footer-text"><a href="terminos_y_condiciones.html">Términos y Condiciones</a></p>
+</footer>
+<script>
+const unavailableDates = [];
+    let selectedCell = null;
+    let selectedDate = null;
+        let currentMonth = new Date().getMonth();
+        let currentYear = new Date().getFullYear();
+
+        const monthNames = [
+            "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+            "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+        ];
+
+        function renderCalendar(month, year) {
+            document.getElementById('monthYear').textContent = `${monthNames[month]} ${year}`;
+            const daysGrid = document.getElementById('calendarDays');
+            const calendarGrid = document.getElementById('calendar');
+            daysGrid.innerHTML = '';
+            calendarGrid.innerHTML = '';
+
+          
+            const days = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+            days.forEach(d => {
+                const dayDiv = document.createElement('div'); // crea un div por cada día de la semana
+                dayDiv.className = 'calendar-day';
+                dayDiv.textContent = d;
+                daysGrid.appendChild(dayDiv);
+            });
+
+            
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            
+            for (let i = 0; i < firstDay; i++) {
+                const emptyCell = document.createElement('div');
+                emptyCell.className = 'calendar-cell';
+                emptyCell.style.visibility = 'hidden';
+                calendarGrid.appendChild(emptyCell);
+            }
+
+            
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+                const cell = document.createElement('div');
+                cell.className = 'calendar-cell';
+                cell.textContent = day;
+
+                if (unavailableDates.includes(dateStr)) {
+                    cell.classList.add('unavailable');
+                } else {
+                    cell.addEventListener('click', function() {
+                        if (selectedCell) selectedCell.classList.remove('selected'); // elimina la clase seleccionada del elemento previamente seleccionado
+                        cell.classList.add('selected');
+                        selectedCell = cell;
+                        selectedDate = dateStr;
+                        document.getElementById('reservationForm').style.display = 'block';
+                        document.getElementById('selectedDate').textContent = `Fecha seleccionada: ${day} de ${monthNames[month]} de ${year}`;
+                        document.getElementById('successMsg').style.display = 'none';
+                    });
+                }
+                calendarGrid.appendChild(cell);
+            }
+        }
+
+        document.getElementById('prevMonth').onclick = function() {
+            currentMonth--;
+            if (currentMonth < 0) {
+                currentMonth = 11;
+                currentYear--;
+            }
+            renderCalendar(currentMonth, currentYear);
+            document.getElementById('reservationForm').style.display = 'none';
+        };
+        document.getElementById('nextMonth').onclick = function() {
+            currentMonth++;
+            if (currentMonth > 11) {
+                currentMonth = 0;
+                currentYear++;
+            }
+            renderCalendar(currentMonth, currentYear);
+            document.getElementById('reservationForm').style.display = 'none';
+        };
+
+        document.getElementById('confirmReservation').onclick = function() {
+            const nombre = document.getElementById('nombre').value.trim();
+            const email = document.getElementById('email').value.trim();
+            if (nombre && email && selectedDate) {
+                unavailableDates.push(selectedDate);
+                renderCalendar(currentMonth, currentYear);
+                document.getElementById('reservationForm').style.display = 'block';
+                document.getElementById('successMsg').style.display = 'block';
+                document.getElementById('nombre').value = '';
+                document.getElementById('email').value = '';
+            }
+        };
+
+        
+        renderCalendar(currentMonth, currentYear);
+        </script>
+</body>
+</html>
